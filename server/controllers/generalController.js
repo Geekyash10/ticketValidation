@@ -1,17 +1,22 @@
 const user = require('../models/userModel');
-const {v4 : uuidv4} = require('uuid')
+const { v4: uuidv4 } = require('uuid')
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const { Mailgen } = require('mailgen');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 module.exports.generateQRCode = async (req, res) => {
     const { username, email } = req.body;
-    const qr_id = uuidv4()        
+    const qr_id = uuidv4()
 
     const validated = false;
-    if(!username || !email) {
+    if (!username || !email) {
         res.status(400).send('Please enter all fields');
     }
 
     const found = await user.findOne({ email });
-    if(found) {
+    if (found) {
         res.status(400).send('User already exists with this mail');
     }
 
@@ -22,13 +27,13 @@ module.exports.generateQRCode = async (req, res) => {
 
 module.exports.getQRCode = async (req, res) => {
     const { email } = req.body;
-    if(!email) {
+    if (!email) {
         res.status(400).send('Please enter all fields');
     }
 
     const found = await user.findOne({ email });
 
-    if(!found) {
+    if (!found) {
         res.status(400).send('User does not exist');
     }
 
@@ -38,12 +43,12 @@ module.exports.getQRCode = async (req, res) => {
 
 module.exports.validateUser = async (req, res) => {
     const { qr_id } = req.body;
-    if(!qr_id) {
+    if (!qr_id) {
         res.status(400).send('Please enter all fields');
     }
 
     const found = user.findOne({ qr_id });
-    if(!found) {
+    if (!found) {
         res.status(400).send('User does not exist');
     }
 
@@ -52,4 +57,23 @@ module.exports.validateUser = async (req, res) => {
     res.json("User validated successfully");
 }
 
+const transporter = nodemailer.createTransport(
+    {
+        service: 'gmail',
+        auth:
+        {
+            user: 'mittalyas1234@gmail.com',
+            pass: '123456',
+        },
 
+    });
+
+const mailGenerator = new Mailgen(
+    {
+        theme: 'default',
+        product:
+        {
+            name: 'Yash',
+        },
+    });
+const { name, email } = req.body;
